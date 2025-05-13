@@ -1,0 +1,51 @@
+version: "3.9"
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "15672:15672" # management UI
+      - "5672:5672" # AMQP
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+
+  flowise:
+    build: ./flows
+    container_name: flowise
+    ports:
+      - "3000:3000" # Flowise Supervisor UI & API
+    depends_on:
+      - rabbitmq
+    # if you want to hot-edit your flow JSONs, uncomment:
+    # volumes:
+    #   - ./flows:/data/flows
+
+  api:
+    build: ./node-react-app/backend
+    container_name: fsai-api
+    ports:
+      - "4000:4000" # Your Node.js WebSocket/API server
+    environment:
+      - RABBIT_URL=amqp://rabbitmq:5672
+      - PORT=4000
+    depends_on:
+      - rabbitmq
+      - flowise
+
+  frontend:
+    build: ./node-react-app/frontend
+    container_name: fsai-frontend
+    ports:
+      - "5173:80" # React Frontend → Host port 5173
+    depends_on:
+      - api
+
+  pharmacy:
+    build: ./pharmacy-app
+    container_name: pharmacy-ui
+    ports:
+      - "5174:80" # Pharmacy UI → Host port 5174
+    depends_on:
+      - flowise
