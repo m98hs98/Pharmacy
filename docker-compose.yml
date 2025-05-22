@@ -1,4 +1,4 @@
-version: "3.9"
+# version: "3.9"
 
 services:
   rabbitmq:
@@ -18,9 +18,6 @@ services:
       - "3000:3000" # Flowise Supervisor UI & API
     depends_on:
       - rabbitmq
-    # if you want to hot-edit your flow JSONs, uncomment:
-    # volumes:
-    #   - ./flows:/data/flows
 
   api:
     build: ./node-react-app/backend
@@ -46,6 +43,6 @@ services:
     build: ./pharmacy-app
     container_name: pharmacy-ui
     ports:
-      - "5174:80" # Pharmacy UI → Host port 5174
+      - "5174:81" # Pharmacy UI → Host port 5174
     depends_on:
       - flowise
